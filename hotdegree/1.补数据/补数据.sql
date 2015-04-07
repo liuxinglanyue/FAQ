@@ -1,0 +1,23 @@
+INSERT  R_BACKUP_FLOW (
+	RECORD_TIME,
+	CHANNEL_IDN,
+	SECTOR_IDN,
+	FLOW_RATE,
+	USER_NUM
+)(
+	SELECT
+		date_add(RECORD_TIME, INTERVAL 24 MINUTE),
+	       CHANNEL_IDN,
+	       SECTOR_IDN,
+	       FLOW_RATE,
+	       USER_NUM
+	FROM
+		R_BACKUP_FLOW
+	WHERE
+		record_time > '2014-03-18 16:30:00'
+	AND record_time < '2014-03-18 16:36:00'
+)
+
+
+SELECT * FROM R_BACKUP_FLOW GROUP BY record_time ORDER BY  record_time DESC
+SELECT * FROM R_SECTOR_FLOW GROUP BY record_time ORDER BY  record_time DESC

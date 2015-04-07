@@ -1,0 +1,88 @@
+R_ALLHA_PERCENTAGE	         时间段百分比
+R_AVERAGE_RESPONSETIME	     平均响应时间
+R_BACKUP_FLOW	               回源流量表（重点保障）
+r_hot_content	               内容热度分析
+R_LAYER_RESPTIME	           分层响应时间统计
+R_SECTOR_FLOW	               扇区流量表（重点保障）
+R_SECTOR_HA	                 扇区可用率表
+R_SECTOR_HITPERCENTAGE	     扇区命中率表
+R_STATUS_CODE_PERCENTAGE	   访问状态码百分比
+r_user_district	             用户国家地区及ISP
+r_user_refer	               用户来源站分析
+r_user_resource	             用户资源使用分析
+r_user_visitor	             用户(UV)数统计
+
+
+当图表数据数据有缺失的时候，以数据表R_SECTOR_FLOW为例，将2014-01-16 07:34:00到2014-01-16 09:30:00正确的数据，
+复制一份添加到当前数据库中并指定成一天后的数据，红色字体表示天数加1，加粗字体表示天数，可以为负数，也可以把后面的day改成hour，变成加1小时。
+INSERT R_SECTOR_FLOW (
+	RECORD_TIME,
+	SECTOR_IDN,
+	FLOW_RATE,
+	CHANNEL_IDN,
+	USER_NUM
+)(
+	SELECT
+		date_add(RECORD_TIME, INTERVAL 1 DAY),
+		SECTOR_IDN,
+		FLOW_RATE,
+		CHANNEL_IDN,
+		USER_NUM
+	FROM
+		R_SECTOR_FLOW
+	WHERE
+		record_time > '2014-01-16 07:34:00'
+	AND record_time < '2014-01-16 09:30:00'
+)
+
+
+当图表数据又毛刺或者凹坑的时候，以 R_SECTOR_FLOW表为例，在毛刺附近的时间点内进行查询，按分钟排序，求和，找不和谐数据，
+下属查询时在2014-01-23 13:40:00到'2014-01-23 13:45:00的图表上发现一个毛刺，或者凹坑，可能是数据又丢失，但只有一分钟的数据丢失，
+通过下属查询查找到每分钟的数据汇总，得到某一分钟数据不平滑。
+SELECT
+	record_time,
+	(sum(flow_rate) * 8 / 1000000) / 60 AS rate
+FROM
+	R_SECTOR_FLOW
+WHERE
+	record_time > '2014-01-23 13:40:00'
+AND record_time < '2014-01-23 14:55:00'
+GROUP BY
+	record_time
+	
+当发现某一分钟数据不平滑的时候，可以使用语句，将某一分钟的数据乘以一个倍数，来进行修正。
+UPDATE R_SECTOR_FLOW
+SET flow_rate = flow_rate *0.92
+WHERE
+    record_time = '2014-01-23 14:02:00'
+
+
+在进行大数据重新计算数据的时候，经常性出现，数据被重复计算了，这时候会在报表上出现流量增加到原来的一倍或者多倍的情况，此时使用该脚本，
+可以删除重复数据，可能需要逐行执行。
+drop table tmp;
+CREATE TABLE tmp AS (
+	SELECT		min(id) AS id
+	FROM		R_SECTOR_FLOW
+	GROUP BY
+		RECORD_TIME,
+		SECTOR_IDN,
+		FLOW_RATE,
+		CHANNEL_IDN,
+		USER_NUM
+	HAVING		count(*) > 1);
+delete FROM R_SECTOR_FLOW WHERE id IN   (select id from tmp);
+
+
+1、登录 HTCDN-ZJHZ-NOC-TBLOG-02 服务器，通过命令：cat /data/yeexun/hotdegree/logs/hotdegree.log|grep alter\ table\ |grep 001 查看缺失的日志。
+
+
+手工补状态码丢失数据
+INSERT R_STATUS_CODE_PERCENTAGE (RECORD_TIME,device_IDN,status_code,all_num,percentAGE,channel_idn)
+(SELECT
+  date_add(RECORD_TIME, INTERVAL 10 MINUTE  ),DEVICE_IDN,status_code,all_num,percentAGE,channel_idn
+ FROM
+  R_STATUS_CODE_PERCENTAGE
+ WHERE
+  record_time >=  '2014-03-18 07:10:00'
+  AND record_time <= '2014-03-18 07:18:00'
+)

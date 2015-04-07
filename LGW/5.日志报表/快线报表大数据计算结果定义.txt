@@ -1,0 +1,33 @@
+请求次数统计报表（坐标图）——全系统某一种业务的流量报表   五分钟间隔
+结果文件名：ExpressLane_service_flow.txt ，源站压力统计（坐标图）
+格式：时间(yyyyMMddhhmm)|业务类型（http|https|nat）|设备ID|appid|访问次数|服务流量(B)|累计回源流量（B）
+
+用户来源站统计（饼图+表格）——全系统某一种业务的流量报表 半小时间隔
+结果文件名：ExpressLane_refer.txt
+格式：时间(yyyyMMddhhmm)|业务类型（http|https|nat）|设备ID|appid|refer|访问次数|累计流量(B)
+
+独立用户统计（饼图+表格）——全系统某一种业务的流量报表 半小时间隔
+结果文件名：ExpressLane_uv.txt
+格式：时间(yyyyMMddhhmm)|业务类型（http|https|nat）|设备ID|appid|uv
+
+返回状态统计（饼图）——全系统某一种业务的流量报表  半小时间隔
+结果文件名：ExpressLane_response_status.txt
+格式：时间(yyyyMMddhhmm)|业务类型（http|https|nat）|设备ID|appid|status|访问次数|累计流量(B)
+
+
+响应时间统计（坐标图）——全系统某一种业务的流量报表  五分钟间隔
+结果文件名：ExpressLane_response_status.txt
+格式：时间(yyyyMMddhhmm)|业务类型（http|https|nat）|设备ID|appid|response_time(时间内响应时间总和毫秒)
+
+Page ViewS/Min，User ViewS/Min（PV，UV） 5分钟间隔
+结果文件名：ExpressLane_pvuv.txt
+格式：时间(yyyyMMddhhmm)|业务类型（http|https|nat）|设备ID|appid|uv|pv
+
+
+用户终端类型比例和访问次数按选择的周期进行查询（饼图+表格）
+结果文件名：ExpressLane_user_agent.txt
+格式：时间(yyyyMMddhhmm)|业务类型（http|https|nat）|设备ID|appid|userAgent|访问次数|累计流量(B)
+
+特定URL的访问次数统计报表
+结果文件名：ExpressLane_url.txt
+格式：时间(yyyyMMddhhmm)|业务类型（http|https|nat）|设备ID|appid|url|访问次数|累计流量(B)
